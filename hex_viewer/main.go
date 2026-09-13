@@ -5,9 +5,9 @@ import (
 	"os"
 )
 
-func Loop(arr *[]byte, lineCounter *uint, start int, end int) {
+func Loop(arr *[]byte, lineCounter *int64, start int64, end int64) {
 	fmt.Printf("%08s", fmt.Sprintf("%b", *lineCounter))
-	(*lineCounter)++
+	(*lineCounter) += 16
 	for _, i := range (*arr)[start:end] {
 		fmt.Printf("%4s ", fmt.Sprintf("%X", i))
 	}
@@ -20,25 +20,29 @@ func Loop(arr *[]byte, lineCounter *uint, start int, end int) {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		panic("no argument were provided. You need to pass one file to read.")
+	}
 	file, err := os.ReadFile(os.Args[1])
-	lineCounter := uint(0)
-	lineLength := 16
-	start := 0
+	lineCounter := int64(0)
+	lineLength := int64(16)
+	start := int64(0)
 	end := lineLength
+	filelen := int64(len(file))
 
 	if err != nil {
 		panic(err)
 	}
-	if len(file) < lineLength {
-		Loop(&file, &lineCounter, int(0), int(len(file)))
+	if filelen < lineLength {
+		Loop(&file, &lineCounter, int64(0), filelen)
 		os.Exit(1)
 	}
-	for len(file) > 0 {
-		if end > len(file) {
-			Loop(&file, &lineCounter, start, len(file))
+	for filelen > 0 {
+		if end > filelen {
+			Loop(&file, &lineCounter, start, filelen)
 			os.Exit(1)
 		}
-		if len(file) > lineLength {
+		if filelen > lineLength {
 			Loop(&file, &lineCounter, start, end)
 			start = end
 			end = end + lineLength
